@@ -5,7 +5,6 @@ import pymongo
 from datetime import datetime
 # from bson import BSON
 from bson import json_util
-from classhelp import *
 from bson.objectid import ObjectId
 # import isodate
 
