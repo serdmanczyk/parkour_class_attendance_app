@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block body %}
+<div class="header">
+    <h1>Edit Student</h1>
+</div>
+<div class="content">
+    <h2> {{ student.male }} </h2>
+    <form class="pure-form pure-form-stacked" action="{{ url_for('student_page', student_id='') }}{{ student.id }}" method="post">
+        <fieldset>
+            <label for="name">Name</label>
+            <input name="name" type="text" value="{{ student.name }}" size="40">
+
+            <label for="dob">Birthdate</label>
+            <input name="dob" type="text"  value="{{ student.dob }}" id="datepicker" size="40">
+
+            <label for="email">E-mail</label>
+            <input name="email" type="email" value="{{ student.email }}" size="40">
+
+            <label for="emergencycontact">Emergency Contact</label>
+            <input name="emergencycontact" type="text"  value="{{ student.emergencycontact }}" size="40">
+
+            <label for="emergencyphone">Emergency Phone</label>
+            <input name="emergencyphone" type="text"  value="{{ student.emergencyphone }}" size="40">
+
+            <label for="gender">Gender</label>            
+            <select name="gender" id="type">
+              <option >Female </option>
+              <option {% if student.gender == "Male" %} selected="selected"{% endif %}>Male </option>
+            </select>
+
+            <button type="submit" class="pure-button pure-button-primary">Update</button>
+        </fieldset>
+    </form>
+</div>
+{% endblock %}

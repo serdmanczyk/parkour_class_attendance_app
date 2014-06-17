@@ -1,0 +1,46 @@
+<!doctype html>
+<title>PK Class Page</title>
+<!--link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}"-->
+<link rel="stylesheet" href="http://yui.yahooapis.com/pure/0.4.2/pure-min.css">
+<!-- <link rel="stylesheet" href="css/layouts/side-menu.css"> -->
+<link rel="stylesheet" href="{{ url_for('static', filename='side-menu.css') }}" />
+<link rel="stylesheet" href="//code.jquery.com/ui/1.10.4/themes/smoothness/jquery-ui.css">
+<script src="//code.jquery.com/jquery-1.9.1.js"></script>
+<script src="//code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
+
+<script type=text/javascript>
+  var $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+</script>
+<script>
+$(function() {
+  $( "#datepicker" ).datepicker({
+    changeMonth: true,
+    changeYear: true,
+    showButtonPanel: true,
+  yearRange: "-50:c"
+  });
+  $(function() {
+    $( "#student_entry" ).autocomplete({
+      source: function( request, response ) { 
+        $.getJSON("{{ url_for('student_autocomplete') }}", request, function( data, status, xhr ) {
+          response( data );
+        });
+      }
+    });
+  });
+});
+</script>
+<body>
+  <div class="header">
+      <div class="home-menu pure-menu pure-menu-open pure-menu-horizontal pure-menu-fixed">
+          <a class="pure-menu-heading" href="">Charlotte Parkour Class Attendance App</a>
+          <ul>
+            <li><a href="{{ url_for('students_page') }}">Students</a></li>
+            <li><a href="{{ url_for('classes_page') }}">Classes</a></li>
+          </ul>
+      </div>
+  </div>
+  <div class="content">
+    {% block body %}{% endblock %}
+  </div>
+</body>

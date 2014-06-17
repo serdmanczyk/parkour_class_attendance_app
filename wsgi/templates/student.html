@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block body %}
+<div class="header">
+    <h1>Student</h1>
+</div>
+<div class="content">
+  <table width="1000px" class="pure-table pure-table-horizontal">
+    <thead>
+      <tr>
+      <td>Name</td>
+      <td>Birthday</td> 
+      <td>Gender</td> 
+      <td>E-mail</td> 
+      <td>Emergency Contact</td> 
+      <td>Emergency Phone</td> 
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>{{ student.name }}</td>
+      <td>{{ student.dob }}</td> 
+      <td>{{ student.gender }}</td> 
+      <td>{{ student.email }}</td> 
+      <td>{{ student.emergencycontact }}</td> 
+      <td>{{ student.emergencyphone }}</td> 
+    </tr>
+    </tbody>
+  </table>
+</div>
+{% endblock %}

@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block body %}
+<div class="header">
+    <h1>Classes</h1>
+</div>
+<div class="content">
+    <form class="pure-form" action="{{ url_for('classes_page') }}" method="post">
+			<fieldset>
+        <label for="coach">Coach:</label>
+        <select name="coach" id="coach" required>
+          {% for coach in coaches %}
+            <option> {{ coach.name }} </option>
+          {% endfor %}
+        </select>
+				<label for="type">Type:</label>
+				<select name="type" id="type">
+					<option>beginner</option>
+					<option>intermediate</option>
+				</select>
+				<input name="date" type="text" placeholder="Date DD/MM/YYYY" id="datepicker">
+				<button type="submit" class="pure-button pure-button-primary">Add New</button>
+			</fieldset>
+    </form>
+  <table width="750px" class="pure-table pure-table-horizontal">
+    <thead>
+      <tr>
+        <td>Coaches</td>
+        <td>Type</td>
+        <td>Date</td> 
+        <td>Attendance</td> 
+        <td> </td> 
+      </tr>
+    </thead>
+    <tbody>
+      {% for class in classes %}    
+        <tr>
+          <td>
+            {{ class.coach }}
+          </td>
+          <td>{{ class.type }}</td> 
+          <td><a href="class/{{class.id}}">{{ class.date }}</a></td> 
+          <td>{{ class.attendance }}</td> 
+          <td>
+            <form class="pure-form" action="{{ url_for('remove_class', class_id='') }}{{ class.id }}" method="post">
+              <button type="submit" class="pure-button pure-button-primary">Delete</button>
+            </form>
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

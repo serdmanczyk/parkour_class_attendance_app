@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block body %}
+<div class="header">
+    <h1>Students</h1>
+</div>
+<div class="content">
+    <form class="pure-form" action="{{ url_for('students_page') }}" method="post">
+      <fieldset>
+        <input name="name" type="text" placeholder="Name" required>
+        <input name="dob" type="text" placeholder="Birth Date" id="datepicker">
+        <input name="email" type="email" placeholder="Email">
+        <input name="emergencycontact" type="text" placeholder="Emergency Contact">
+        <input name="emergencyphone" type="text" placeholder="Emergency Phone">
+        <select name="gender" id="type">
+          <option>Male </option>
+          <option>Female </option>
+        </select>
+        <button type="submit" class="pure-button pure-button-primary">Add New</button>
+      </fieldset>
+    </form>
+  <table width="750px" class="pure-table pure-table-horizontal">
+    <thead>
+      <tr>
+        <td>Name</td>
+        <td>Age</td> 
+        <td>Gender</td> 
+        <td>E-mail</td> 
+      </tr>
+    </thead>
+    <tbody>
+      {% for student in students %}    
+        <tr>
+          <td><a href="{{ url_for('edit_student', student_id='') }}{{ student.id }}">{{ student.name }}</a></td>
+          <td>{{ student.age }}</td> 
+          <td>{{ student.gender }}</td> 
+          <td>{{ student.email }}</td> 
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

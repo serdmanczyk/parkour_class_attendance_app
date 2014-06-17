@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block body %}
+<div class="header">
+  <h1> Class <h1>
+    <h2> {{ classrec.coach }} | {{ classrec.type }} | {{ classrec.date }} </h2>
+</div>
+<div class="content">
+  <form class="pure-form" action="{{ url_for('class_page', class_id='') }}{{ classrec.id }}" method="post">
+    <fieldset>
+      <input name="name" type="text" placeholder="Full Name" id="student_entry" required>
+      <input name="payment" type="text" placeholder="Purchased Amount">
+      <select name="method" id="method">
+        <option>cash</option>
+        <option>check</option>
+        <option>credit</option>
+      </select>
+      <select name="type" id="type">
+        <option>free class</option>
+        <option>drop in</option>
+        <option>punched</option>
+        <option>5-class-card</option>
+        <option>10-class-card</option>
+      </select>
+      <button type="submit" class="pure-button pure-button-primary">Mark</button>
+    </fieldset>
+  </form>
+  <table class="pure-table pure-table-horizontal">
+    <thead>
+    <tr>
+      <td>Name</td>
+      <td>Age</td>
+      <td>Gender</td> 
+      <td>Purchase</td> 
+      <td>Purchase Method</td> 
+      <td> </td> 
+    </tr>
+    </thead>
+    <tbody>
+    {% for student in classrec.attendance %}    
+      <tr>
+        <td><a href="{{ url_for('student_page', student_id='') }}{{ student.id }}">{{ student.name }}</a></td>
+        <td>{{ student.age }}</td> 
+        <td>{{ student.gender }}</td> 
+        <td>{{ student.purchased }}</td> 
+        <td>{{ student.purchasemethod }}</td> 
+        <td>
+          <form class="pure-form" action="{{ url_for('remove_attendance', class_id='') }}{{ classrec.id }}" method="post">
+            <input name="student_id" type="hidden" value="{{ student.id }}">
+            <button type="submit" class="pure-button pure-button-primary">Delete</button>
+          </form>
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
