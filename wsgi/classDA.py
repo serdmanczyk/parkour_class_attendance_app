@@ -1,13 +1,10 @@
 import json
 import re
 import pymongo
-# from random import randint, choice
 from datetime import datetime
 # from bson import BSON
 from bson import json_util
-from classhelp import *
 from bson.objectid import ObjectId
-# import isodate
 
 class ClassDAO():
 
@@ -35,7 +32,7 @@ class ClassDAO():
 		first, last = None, None
 		pieces = re.split("\W+", name_start)
 		if len(pieces) > 1:
-			first, last = pieces[0], pieces[1]
+			first, last = pieces[0], " ".join(pieces[1:])
 		elif len(pieces) == 1:
 			first = pieces[0]
 		else:
@@ -71,7 +68,7 @@ class ClassDAO():
 		first, last = None, None
 		pieces = re.split("\W+", name)
 		if len(pieces) > 1:
-			first, last = pieces[0], pieces[1]
+			first, last = pieces[0], " ".join(pieces[1:])
 		else:
 			print("Name doesn't match pattern")
 			return None
@@ -216,7 +213,7 @@ class ClassDAO():
 		first, last = None, None
 		pieces = re.split("\W+", name)
 		if len(pieces) > 1:
-			first, last = pieces[0], pieces[1]
+			first, last = pieces[0], " ".join(pieces[1:])
 		else:
 			print("Name doesn't match pattern")
 			return None
@@ -237,7 +234,7 @@ class ClassDAO():
 		first, last = None, None
 		pieces = re.split("\W+", name)
 		if len(pieces) > 1:
-			first, last = pieces[0], pieces[1]
+			first, last = pieces[0], " ".join(pieces[1:])
 		else:
 			print("Name doesn't match pattern")
 			return None

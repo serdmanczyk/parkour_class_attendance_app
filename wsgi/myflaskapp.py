@@ -8,13 +8,23 @@ import os
 app = Flask(__name__)
 app.debug = True
 
-path = os.environ['OPENSHIFT_REPO_DIR']
-with open(path + "wsgi/authinfo.json") as jauth:
-    authinfo = json.load(jauth)
+mongostr = "mongodb://{}:{}@{}:{}".format(
+        os.environ['OPENSHIFT_MONGODB_DB_USERNAME'],
+        os.environ['OPENSHIFT_MONGODB_DB_PASSWORD'],
+        os.environ['OPENSHIFT_MONGODB_DB_HOST'],
+        os.environ['OPENSHIFT_MONGODB_DB_PORT'],
+    )
 
-app.secret_key = authinfo["secret_key"]
-oauth = OAuth()
-google = oauth.remote_app('google',
+con = pymongo.MongoClient(mongostr)
+pkDB = con.pkclass
+dao = ClassDAO(pkDB)
+coaches = dao.GetCoaches()
+valid_emails = [c['email'] for c in coaches]
+
+g_auth = pkDB.authorization.find_one({"name":"google"})
+
+app.secret_key = g_auth["secret_key"]
+google = OAuth().remote_app('google',
                         base_url='https://www.google.com/accounts/',
                         authorize_url='https://accounts.google.com/o/oauth2/auth',
                         request_token_url=None,
@@ -25,20 +35,8 @@ google = oauth.remote_app('google',
                         access_token_url='https://accounts.google.com/o/oauth2/token',
                         access_token_method='POST',
                         access_token_params={'grant_type': 'authorization_code'},
-                        consumer_key=authinfo["consumer_key"],
-                        consumer_secret=authinfo["consumer_secret"])
-
-mongostr = "mongodb://{}:{}@{}:{}".format(
-        os.environ['OPENSHIFT_MONGODB_DB_USERNAME'],
-        os.environ['OPENSHIFT_MONGODB_DB_PASSWORD'],
-        os.environ['OPENSHIFT_MONGODB_DB_HOST'],
-        os.environ['OPENSHIFT_MONGODB_DB_PORT'],
-    )
-
-con = pymongo.MongoClient(mongostr)
-dao = ClassDAO(con.pkclass)
-coaches = dao.GetCoaches()
-valid_emails = [c['email'] for c in coaches]
+                        consumer_key=g_auth["consumer_key"],
+                        consumer_secret=g_auth["consumer_secret"])
 
 @app.route('/')
 def index():
@@ -82,8 +80,11 @@ def get_access_token():
 
 @app.route('/students', methods=['POST', 'GET'])
 def students_page():
+    access_token = session.get('access_token')
+    if access_token is None:
+        return redirect(url_for('login'))
+        
     if request.method == 'POST':
-        # print(request.form)
         name = request.form.get('name')
         dob = request.form.get('dob')
         emergencyphone = request.form.get('emergencyphone')
@@ -95,11 +96,19 @@ def students_page():
 
 @app.route('/student_autocomplete')
 def student_autocomplete():
+    access_token = session.get('access_token')
+    if access_token is None:
+        return redirect(url_for('login'))
+        
     term = request.args.get("term")
     return dao.AutocompleteStudent(term)
 
 @app.route('/student/<student_id>', methods=['POST', 'GET'])
 def student_page(student_id):
+    access_token = session.get('access_token')
+    if access_token is None:
+        return redirect(url_for('login'))
+        
     if request.method == 'POST':
         print(request.form)
         name = request.form.get('name')
@@ -118,6 +127,10 @@ def edit_student(student_id):
 
 @app.route('/classes', methods=['POST', 'GET'])
 def classes_page():
+    access_token = session.get('access_token')
+    if access_token is None:
+        return redirect(url_for('login'))
+        
     if request.method == 'POST':
         coach = request.form.get('coach')
         date = request.form.get('date')
@@ -127,11 +140,19 @@ def classes_page():
 
 @app.route('/remove_class/<class_id>', methods=['POST'])
 def remove_class(class_id):
+    access_token = session.get('access_token')
+    if access_token is None:
+        return redirect(url_for('login'))
+        
     dao.RemoveClass(class_id)
     return redirect(url_for('classes_page', class_id=class_id))
 
 @app.route('/class/<class_id>', methods=['POST', 'GET'])
 def class_page(class_id):
+    access_token = session.get('access_token')
+    if access_token is None:
+        return redirect(url_for('login'))
+        
     if request.method == 'POST':
         name = request.form.get('name')
         payment = request.form.get('payment')
@@ -142,6 +163,10 @@ def class_page(class_id):
 
 @app.route('/remove_attendance/<class_id>', methods=['POST'])
 def remove_attendance(class_id):
+    access_token = session.get('access_token')
+    if access_token is None:
+        return redirect(url_for('login'))
+        
     student_id = request.form.get('student_id')
     dao.RemoveClassAttendance(class_id, student_id)
     return redirect(url_for('class_page', class_id=class_id))
@@ -149,7 +174,9 @@ def remove_attendance(class_id):
 @app.before_request
 def check_auth():
     email = session.get("email")
-    if valid_emails and email not in valid_emails:
+    if valid_emails and email and (email not in valid_emails):
+        session.pop('access_token', None)
+        session.pop('email', None)
         redirect(url_for('login'))
 
 if __name__ == "__main__":
