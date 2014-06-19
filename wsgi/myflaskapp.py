@@ -16,12 +16,12 @@ mongostr = "mongodb://{}:{}@{}:{}".format(
     )
 
 con = pymongo.MongoClient(mongostr)
-pkDB = con.pkclass
-dao = ClassDAO(pkDB)
+DB = con.classdemo
+dao = ClassDAO(DB)
 coaches = dao.GetCoaches()
 valid_emails = [c['email'] for c in coaches]
 
-g_auth = pkDB.authorization.find_one({"name":"google"})
+g_auth = DB.authorization.find_one({"name":"google"})
 
 app.secret_key = g_auth["secret_key"]
 google = OAuth().remote_app('google',
@@ -110,7 +110,6 @@ def student_page(student_id):
         return redirect(url_for('login'))
         
     if request.method == 'POST':
-        print(request.form)
         name = request.form.get('name')
         dob = request.form.get('dob')
         emergencyphone = request.form.get('emergencyphone')

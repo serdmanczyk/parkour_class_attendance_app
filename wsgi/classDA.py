@@ -2,7 +2,6 @@ import json
 import re
 import pymongo
 from datetime import datetime
-# from bson import BSON
 from bson import json_util
 from bson.objectid import ObjectId
 
@@ -13,6 +12,19 @@ class ClassDAO():
 		self.studentdb = database.students
 		self.coachdb = database.coaches
 		self.classdb = database.classes
+
+	def CalcAge(self, birthday):
+		if birthday is None:
+			return ""
+
+		birthdate = datetime.now() - birthday
+		return int(birthdate.days/365.2425)
+
+	def ValidDate(self, date):
+		try:
+			return datetime.strptime(date, "%m/%d/%Y")
+		except:
+			return None
 
 	def GetCoaches(self):
 		co_recs = self.coachdb.find().sort("name",1)
@@ -131,8 +143,12 @@ class ClassDAO():
 			print("Coach name not in system")
 			return
 		
+		classdate = self.ValidDate(date)
+		if classdate is None:
+			return None
+
 		new_class = {
-			"date" : datetime.strptime(date, "%m/%d/%Y"),
+			"date" : classdate,
 			"coach" : co_rec['_id'],
 			"type" : ctype,
 			"attendance" : []
@@ -169,13 +185,11 @@ class ClassDAO():
 		for attrecord in classrec["attendance"]:
 			student = students[attrecord["student"]]
 			name = student["firstname"] + " " + student["lastname"]
-			# bday = student["dob"].strftime("%A, %B %d %Y at %I:%M%p")
-			age = int((datetime.now() - student["dob"]).days/365.2425)
 
 			classrow = {
 				"id" : student['_id'],
 				"name" : name,
-				"age" : age,
+				"age" : self.CalcAge(student["dob"]),
 				"gender" : student['gender'],
 				"purchased" : "",
 				"purchasemethod" : ""
@@ -195,9 +209,7 @@ class ClassDAO():
 		dbclasses = self.classdb.find().sort("date",-1)
 		dbcoaches = self.coachdb.find()
 
-		coaches = dict()
-		for coach in dbcoaches:
-			coaches[coach['_id']] = coach['name']
+		coaches = {coach['_id']:coach['name'] for coach in dbcoaches}
 
 		classtable = [{
 				"id": classd['_id'],
@@ -221,7 +233,7 @@ class ClassDAO():
 		student = {
 			"firstname" : first,
 			"lastname" : last,
-			"dob" : datetime.strptime(dob, "%m/%d/%Y"),
+			"dob" : self.ValidDate(dob),
 			"email" : email,
 			"gender" : gender,
 			"emergencycontact" : emergencycontact,
@@ -242,7 +254,7 @@ class ClassDAO():
 		student = {
 			"firstname" : first,
 			"lastname" : last,
-			"dob" : datetime.strptime(dob, "%m/%d/%Y"),
+			"dob" : self.ValidDate(dob),
 			"email" : email,
 			"gender" : gender,
 			"emergencycontact" : emergencycontact,
@@ -262,7 +274,7 @@ class ClassDAO():
 		studenttable = [{
 				"id" : stu_rec['_id'],
 				"name": stu_rec['firstname'] + " " + stu_rec['lastname'],
-				"age" : int((datetime.now() - stu_rec["dob"]).days / 365.2425),
+				"age" : self.CalcAge(stu_rec["dob"]),
 				"gender" : stu_rec["gender"],
 				"email" : stu_rec["email"],
 			} for stu_rec in dbstudents]
@@ -272,11 +284,13 @@ class ClassDAO():
 	def GetStudent(self, student_id, edit=False):
 		stu_rec = self.studentdb.find_one({'_id':ObjectId(student_id)})
 
-		dob_format_string = ("%m/%d/%Y" if edit else "%A, %B %d %Y")
+		dob_fmt = ("%m/%d/%Y" if edit else "%A, %B %d %Y")
+		birthdate = lambda x:(x.strftime(dob_fmt) if x else "") 
+
 		student = {
 			"id": stu_rec['_id'],
 			"name": stu_rec['firstname'] + " " + stu_rec['lastname'],
-			"dob" : stu_rec["dob"].strftime(dob_format_string),
+			"dob" : birthdate(stu_rec["dob"]),
 			"gender" : stu_rec["gender"],
 			"email" : stu_rec["email"],
 			"emergencycontact" : stu_rec["emergencycontact"],
